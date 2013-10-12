@@ -1,0 +1,19 @@
+<languageVersion : 1.0;>
+            
+kernel blendy
+<   namespace : "com.adobe.devnet.pixelbender";
+    vendor : "Kevin's Filters";
+    version : 1;
+    description : "mashes two inputs together";
+> 
+{
+    input image4 src;
+    input image4 src2;
+    parameter float blendval ;
+    output pixel4 dst;
+    
+    void evaluatePixel()
+    {
+       dst = mix(sampleNearest(src2,outCoord()),sampleNearest(src, outCoord()), blendval) ;
+    }
+}

@@ -1,0 +1,41 @@
+<languageVersion : 1.0;>
+
+kernel CRTFilter
+<   namespace : "com.Felipe";
+    vendor : "Felipe Budinich";
+    version : 1;
+    description : "CRT";
+>
+{
+    input image4 src;
+    output pixel4 dst;
+    
+    void
+    evaluatePixel()
+    {
+        float ySize = 2.0;
+        float sizeMult = 1.0;
+        float xSize = 3.0;
+        
+        float2 coord = outCoord();
+        float xMod = mod(coord.x, xSize * sizeMult);
+        float yMod = mod(coord.y, ySize * sizeMult) - sizeMult + 1.0;
+        
+        float2 sampleCoord = float2(coord.x - xMod, coord.y - yMod);
+        pixel4 samplePixel = sampleNearest(src, sampleCoord);
+        
+        dst.rgba = pixel4(0, 0, 0, 255);
+        
+        if (floor(yMod) != ((ySize - 1.0) * sizeMult)) {
+            if ((floor(xMod) >= 0.0) && (floor(xMod) < (1.0 * sizeMult))) {
+                dst.r = samplePixel.r - 0.3;
+            }
+            else if ((floor(xMod) >= 1.0) && (floor(xMod) < (2.0 * sizeMult))) {
+                dst.g = samplePixel.g - 0.1;
+            }
+            else if (floor(xMod) >= (2.0 * sizeMult)) {
+                dst.b = samplePixel.b;
+            }
+        }
+    }
+}
