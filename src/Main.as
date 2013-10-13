@@ -8,7 +8,7 @@ package
 	import org.flixel.*;
 	import util.Data;
 
-	[SWF(width = "960", height = "720", frameRate = "60", backgroundColor = "#000000")]
+	[SWF(width = "640", height = "480", frameRate = "60", backgroundColor = "#000000")]
 	
 	
 	public class Main extends FlxGame
@@ -18,16 +18,10 @@ package
 		public function Main():void 
 		{
 			
-			//if (stage.fullScreenWidth > 800) {
-			//	screenRatio = 3;
-			//} else {
-				screenRatio = 3;
-			//}	
-			
-			
+				screenRatio = 2;
 			
 			Data.load();
-			super(320, 240, C_01, screenRatio);
+			super(320, 240, Game, screenRatio);
 			
 		}
 		

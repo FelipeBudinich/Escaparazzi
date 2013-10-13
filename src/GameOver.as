@@ -6,10 +6,6 @@ package
 	 */
 	
 	import org.flixel.*;
-	import org.flixel.data.FlxAnim;
-	import org.flixel.FlxG;
-	import org.flixel.FlxGame;
-	import org.flixel.FlxSprite;
 	import util.Data;
 	import org.flixel.data.FlxKeyboard;
 	

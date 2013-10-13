@@ -6,7 +6,7 @@
 	 */
 	
 	import org.flixel.*;
-	import org.flixel.FlxSprite;
+
 	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.utils.getTimer;
@@ -181,15 +181,6 @@
 		private var headHUD:FlxSprite;
 		private var timerChoque:Number = 9999;
 
-
-		//Variables para puntaje
-		//public var puntosTotales:int;
-		//choques
-		//fotos
-		//popstarMob.members.length -3
-		//timer
-		//moneyzAmount
-		
 		public function Game() 
 		{
 		}
@@ -197,27 +188,19 @@
 		override public function preProcess():void
 		{
 
-			
 			if (explodeGroup.members.length > 0) {
 			FlxG.buffer.applyFilter(FlxG.buffer, new Rectangle(0, 0, FlxG.width, FlxG.height), new Point(0, 0), tvFilter);
 			} else {
 				screen.fill(bgColor);	
 			}
 			
-		}
-		
-
-		
-		override public function postProcess(): void {
-
+			FlxG.buffer.applyFilter(screen.pixels, new Rectangle(0, 0, FlxG.width, FlxG.height), new Point(0, 0), noiseFilter);
+			
 			coolShader.data.flash.value = [flash];
 			coolShader.data.red.value = [red];
 			FlxG.buffer.applyFilter(FlxG.buffer, new Rectangle(0, 0, FlxG.width, FlxG.height), new Point(0, 0), coolFilter);
-			
-			FlxG.buffer.applyFilter(screen.pixels, new Rectangle(0, 0, FlxG.width, FlxG.height), new Point(0, 0), noiseFilter);
-			
-		
 		}
+		
 		
 
 		
@@ -407,10 +390,6 @@
 			}
 			
 			super.update();
-		
-			if (FlxG.keys.T) {
-				trace(stage.fullScreenHeight);
-			}
 			
 			if (flashTimer > 0) {
 				flashTimer -= FlxG.elapsed;
@@ -434,13 +413,13 @@
 				inputTimer -= FlxG.elapsed;
 				
 				if (FlxG.keys.UP && popStar.facing == FlxSprite.UP || FlxG.keys.W && popStar.facing == FlxSprite.UP) {
-					//trace('no input');
+					
 				} else if (FlxG.keys.DOWN && popStar.facing == FlxSprite.DOWN || FlxG.keys.S && popStar.facing == FlxSprite.DOWN) {
-					//trace('no input');
+					
 				} else if (FlxG.keys.LEFT && popStar.facing == FlxSprite.LEFT || FlxG.keys.A && popStar.facing == FlxSprite.LEFT) {
-					//trace('no input');
+					
 				} else if (FlxG.keys.RIGHT && popStar.facing == FlxSprite.RIGHT || FlxG.keys.D && popStar.facing == FlxSprite.RIGHT) {
-					//trace('no input');
+					
 				} else if (FlxG.keys.UP || FlxG.keys.DOWN || FlxG.keys.LEFT || FlxG.keys.RIGHT || FlxG.keys.A || FlxG.keys.S || FlxG.keys.D || FlxG.keys.W){
 						
 						inputTimer = 15.0;
@@ -522,7 +501,7 @@
 		}
 		
 		private function correrse(object_1:FlxObject, object_2:FlxObject):void {
-			trace("tocandose");
+
 			if (object_1.x >= object_2.x) {
 				object_2.x -= 6;
 				object_1.x += 6;
@@ -642,7 +621,7 @@
 			
 			//Buscar referencia para remover del array
 			if (popStarMob.members.indexOf(object1) > 0) {
-			trace(popStarMob.members.indexOf(object1));
+
 			popStarMob.remove(object1, true);
 			traffic.remove(object2, true);
 			if (traffic.members.length < 5) {
@@ -670,16 +649,6 @@
 			}
 		}
 		
-		/*private function spawnCocaine():void {
-			moneyzSprite = new FlxSprite(_x, _y);
-			moneyzSprite.loadGraphic(MANEY, true, false, 8, 8);
-			moneyzSprite.addAnimation('bling', [0, 1], 5, true);
-			moneyzSprite.play('bling');
-			moneyzPurse.add(moneyzSprite);
-		}
-		
-		private function*/
-		
 		private function deadOpositePaparazzo(object1:FlxObject, object2:FlxObject):void
 		{	
 			Data.currentScore += 250;
@@ -695,7 +664,7 @@
 			
 			//Buscar referencia para remover del array
 			if (popStarMob.members.indexOf(object1) > 0) {
-			trace(popStarMob.members.indexOf(object1));
+
 			popStarMob.remove(object1, true);
 			opositeTraffic.remove(object2, true);
 			if (opositeTraffic.members.length < 5) {
@@ -1061,7 +1030,7 @@
 				
 			if (Data.currentScore > Data.highScore) {
 				Data.highScore = Data.currentScore;
-				trace('más puntos que antes');
+
 				}
 				currentPointString = Data.currentScore.toString();
 				countedPoints = true;
@@ -1169,7 +1138,7 @@
 			currentPointGroup.add(pointHUD);
 			
 			moneyzPurse.members.pop();
-			trace('collected');
+
 			cashGrab = 0.3;
 					switch(util.util.rand(1, 5)) {
 						case 1: FlxG.play(COIN_01); break;
