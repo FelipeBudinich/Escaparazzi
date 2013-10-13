@@ -49,7 +49,7 @@ package
 			introSnd = new FlxSound();
 			introSnd.loadEmbedded(INTROSND);
 			FlxG.mouse.show();
-			trace('click to play');
+
 			trace(Data.highScore);
 		}
 		
@@ -71,7 +71,7 @@ package
 			}
 			
 			if (FlxG.keys.R && FlxG.keys.E) {
-				trace('data erased');
+
 				Data.reset();
 			} else if (FlxKeyboard.any() && FlxG.keys.R == false && FlxG.keys.E == false){
 				FlxG.state = new Game();

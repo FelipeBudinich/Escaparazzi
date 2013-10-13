@@ -21,7 +21,7 @@ package
 				screenRatio = 2;
 			
 			Data.load();
-			super(320, 240, Game, screenRatio);
+			super(320, 240, Intro, screenRatio);
 			
 		}
 		
