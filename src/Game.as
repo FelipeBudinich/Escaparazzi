@@ -244,10 +244,6 @@ package {
                 timerChoque = 9999;
             }
 
-
-
-
-
             //Remove coins from play after MoneyzTimer elapses
             if (moneyzTimer > 0 && moneyzPurse.members.length > 0) {
                 moneyzTimer -= FlxG.elapsed;
@@ -264,37 +260,27 @@ package {
                     moneyzPurse.members.pop();
                 }
             }
-
-            if (moneyzAmount == 1) {
-                moneyzHUD.loadGraphic(AssetsRegistry.NEED_04, true, false, 81, 18);
-
-            } else if (moneyzAmount == 2) {
-                moneyzHUD.loadGraphic(AssetsRegistry.NEED_03, true, false, 81, 18);
-            } else if (moneyzAmount == 3) {
-                moneyzHUD.loadGraphic(AssetsRegistry.NEED_02, true, false, 81, 18);
-            } else if (moneyzAmount == 4) {
-                moneyzHUD.loadGraphic(AssetsRegistry.NEED_01, true, false, 81, 18);
-            } else if (moneyzAmount > 4) {
-                moneyzHUD.loadGraphic(AssetsRegistry.NEED_00, true, false, 81, 18);
-            }
-
-            if (fotos + choques == 1) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_01, true, false, 81, 18);
-            } else if (fotos + choques == 2) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_02, true, false, 81, 18);
-            } else if (fotos + choques == 3) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_03, true, false, 81, 18);
-            } else if (fotos + choques == 4) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_04, true, false, 81, 18);
-            } else if (fotos + choques == 5) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_05, true, false, 81, 18);
-            } else if (fotos + choques == 6) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_06, true, false, 81, 18);
-            } else if (fotos + choques == 7) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_07, true, false, 81, 18);
-            } else if (fotos + choques == 8) {
-                headHUD.loadGraphic(AssetsRegistry.HEAD_08, true, false, 81, 18);
-            }
+				switch (moneyzAmount) {
+					case 0: moneyzHUD.loadGraphic(AssetsRegistry.NEED_05, true, false, 81, 18); break;
+					case 1: moneyzHUD.loadGraphic(AssetsRegistry.NEED_04, true, false, 81, 18); break;
+					case 2: moneyzHUD.loadGraphic(AssetsRegistry.NEED_03, true, false, 81, 18); break;
+					case 3: moneyzHUD.loadGraphic(AssetsRegistry.NEED_02, true, false, 81, 18); break;
+					case 4: moneyzHUD.loadGraphic(AssetsRegistry.NEED_01, true, false, 81, 18); break;
+					case 5: moneyzHUD.loadGraphic(AssetsRegistry.NEED_00, true, false, 81, 18); break;
+				}
+			
+				switch (fotos + choques) {
+					
+					case 0: headHUD.loadGraphic(AssetsRegistry.HEAD_00, true, false, 81, 18); break;
+					case 1: headHUD.loadGraphic(AssetsRegistry.HEAD_01, true, false, 81, 18); break;
+					case 2: headHUD.loadGraphic(AssetsRegistry.HEAD_02, true, false, 81, 18); break;
+					case 3: headHUD.loadGraphic(AssetsRegistry.HEAD_03, true, false, 81, 18); break;
+					case 4: headHUD.loadGraphic(AssetsRegistry.HEAD_04, true, false, 81, 18); break;
+					case 5: headHUD.loadGraphic(AssetsRegistry.HEAD_05, true, false, 81, 18); break;
+					case 6: headHUD.loadGraphic(AssetsRegistry.HEAD_06, true, false, 81, 18); break;
+					case 7: headHUD.loadGraphic(AssetsRegistry.HEAD_07, true, false, 81, 18); break;
+					case 8: headHUD.loadGraphic(AssetsRegistry.HEAD_08, true, false, 81, 18); break;
+				}
 
             if (cashGrab > 0) {
                 cashGrab -= FlxG.elapsed;
@@ -1068,21 +1054,11 @@ package {
 
             cashGrab = 0.3;
             switch (util.util.rand(1, 5)) {
-            case 1:
-                FlxG.play(AssetsRegistry.COIN_01);
-                break;
-            case 2:
-                FlxG.play(AssetsRegistry.COIN_02);
-                break;
-            case 3:
-                FlxG.play(AssetsRegistry.COIN_03);
-                break;
-            case 4:
-                FlxG.play(AssetsRegistry.COIN_04);
-                break;
-            case 5:
-                FlxG.play(AssetsRegistry.COIN_05);
-                break;
+            case 1: FlxG.play(AssetsRegistry.COIN_01); break;
+            case 2: FlxG.play(AssetsRegistry.COIN_02); break;
+            case 3: FlxG.play(AssetsRegistry.COIN_03); break;
+            case 4: FlxG.play(AssetsRegistry.COIN_04); break;
+            case 5: FlxG.play(AssetsRegistry.COIN_05); break;
             }
         }
     }
