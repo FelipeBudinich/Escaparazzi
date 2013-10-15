@@ -82,7 +82,6 @@ package {
         private var emptyOpositeCar: FlxSprite;
         private var emptyTaxi: FlxSprite;
         private var taxiLane: FlxGroup;
-        private var spawnFirst: Boolean = false;
 
         //Moneyz
         public var moneyzAmount: int = 0;
@@ -167,6 +166,8 @@ package {
             emptyOpositeCar = opositeTraffic.members[0];
             emptyOpositeCar.solid = false;
             emptyOpositeCar.createGraphic(16, 16, 0x00000000);
+			
+			spawnCar(10, util.util.rand(60, 80));
 
             spawnTaxi(0, 0);
             emptyTaxi = taxiLane.members[0];
@@ -214,14 +215,10 @@ package {
             scanlines.loadGraphic(AssetsRegistry.NOISE_01, false, false, 320, 240);
             scanlines.alpha = .2;
             add(scanlines);
+			
         }
 
         override public function update(): void {
-
-            if (spawnFirst == false) {
-                spawnCar(10, util.util.rand(60, 80));
-                spawnFirst = true;
-            }
 
             waveTimer -= FlxG.elapsed;
 
@@ -364,10 +361,6 @@ package {
             FlxU.overlap(popStarMob, opositeTraffic, deadOpositePaparazzo);
             FlxU.overlap(popStar, moneyzPurse, kaching);
 
-            /*if (FlxG.keys.ESCAPE) {
-					moneyzAmount = 5;
-				}*/
-
             if ((FlxG.keys.UP || FlxG.keys.W) && popStar.facing != FlxSprite.DOWN) {
                 popStar.facing = FlxSprite.UP;
             } else if ((FlxG.keys.DOWN || FlxG.keys.S) && popStar.facing != FlxSprite.UP) {
@@ -380,7 +373,6 @@ package {
 
             if (getTimer() > nextMove) {
                 moveMob();
-                SpawnMOAR();
                 moveTraffic();
                 moveOpositeTraffic();
                 fadeBonus();
@@ -410,21 +402,11 @@ package {
         private function chocarSnd(): void {
 
             switch (util.util.rand(1, 5)) {
-            case 1:
-                FlxG.play(AssetsRegistry.CRUSH_01);
-                break;
-            case 2:
-                FlxG.play(AssetsRegistry.CRUSH_02);
-                break;
-            case 3:
-                FlxG.play(AssetsRegistry.CRUSH_03);
-                break;
-            case 4:
-                FlxG.play(AssetsRegistry.CRUSH_04);
-                break;
-            case 5:
-                FlxG.play(AssetsRegistry.CRUSH_05);
-                break;
+            case 1: FlxG.play(AssetsRegistry.CRUSH_01); break;
+            case 2: FlxG.play(AssetsRegistry.CRUSH_02); break;
+            case 3: FlxG.play(AssetsRegistry.CRUSH_03); break;
+            case 4: FlxG.play(AssetsRegistry.CRUSH_04); break;
+            case 5: FlxG.play(AssetsRegistry.CRUSH_05); break;
             }
         }
 
@@ -460,9 +442,9 @@ package {
             explosion(object2.x, object2.y);
 
 
-            if (traffic.members.length < 5) {
-                SpawnMOAR();
-            }
+           
+            SpawnMOAR();
+
 
         }
 
@@ -496,10 +478,7 @@ package {
             opositeTraffic.remove(object2, true);
             explosion(object2.x, object2.y);
 
-
-            if (opositeTraffic.members.length < 5) {
-                SpawnMOAR();
-            }
+            SpawnMOAR();
 
         }
 
@@ -592,21 +571,11 @@ package {
                 flashTimer = 0.1;
                 timerFoto = 0.4 * FlxU.random() + 0.1;
                 switch (util.util.rand(1, 5)) {
-                case 1:
-                    FlxG.play(AssetsRegistry.Camara_01);
-                    break;
-                case 2:
-                    FlxG.play(AssetsRegistry.Camara_02);
-                    break;
-                case 3:
-                    FlxG.play(AssetsRegistry.Camara_03);
-                    break;
-                case 4:
-                    FlxG.play(AssetsRegistry.Camara_04);
-                    break;
-                case 5:
-                    FlxG.play(AssetsRegistry.Camara_05);
-                    break;
+                case 1: FlxG.play(AssetsRegistry.Camara_01); break;
+                case 2: FlxG.play(AssetsRegistry.Camara_02); break;
+                case 3: FlxG.play(AssetsRegistry.Camara_03); break;
+                case 4: FlxG.play(AssetsRegistry.Camara_04); break;
+                case 5: FlxG.play(AssetsRegistry.Camara_05); break;
                 }
             }
 
@@ -621,12 +590,12 @@ package {
             randomDirection = util.util.rand(-1, 1);
 
             if (randomDirection > 0) {
-                if (trafficTimer < 0 && traffic.members.length < 5) {
+                if (traffic.members.length < 4) {
                     spawnCar(util.util.rand(-10, 0), util.util.rand(60, 180));
                     trafficTimer = 2.0;
                 }
             } else {
-                if (opositeTrafficTimer < 0 && opositeTraffic.members.length < 5) {
+                if (opositeTraffic.members.length < 4) {
                     spawnOpositeCar(util.util.rand(320, 310), util.util.rand(60, 180));
                     opositeTrafficTimer = 2.0;
                 }
@@ -777,6 +746,7 @@ package {
 
 
                 if (addFollower) {
+					
                     switch (util.util.rand(1, (1 + moneyzAmount))) {
                     case 1:
                         spawnNewMob(oldX, oldY);
@@ -823,6 +793,9 @@ package {
                     }
 
                     addFollower = false;
+					
+					//add new car
+					SpawnMOAR();
                 }
             }
         }
@@ -851,7 +824,6 @@ package {
             paparazzos.addAnimation('run', [0, 1, 2, 3, 4, 5], 12, true);
             paparazzos.play('run');
             popStarMob.add(paparazzos);
-
 
         }
 
