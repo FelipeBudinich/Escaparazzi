@@ -85,11 +85,11 @@ package registry {
         [Embed(source = '../../assets/snd/moneyz/moneyz_05.mp3')] public static const COIN_05: Class;
 
         //Car Crashes
-        [Embed(source = '../../assets/snd/car/car_01.mp3')] public static const CRUSH_01: Class;
-        [Embed(source = '../../assets/snd/car/car_02.mp3')] public static const CRUSH_02: Class;
-        [Embed(source = '../../assets/snd/car/car_03.mp3')] public static const CRUSH_03: Class;
-        [Embed(source = '../../assets/snd/car/car_04.mp3')] public static const CRUSH_04: Class;
-        [Embed(source = '../../assets/snd/car/car_05.mp3')] public static const CRUSH_05: Class;
+        [Embed(source = '../../assets/snd/car/car_01.mp3')] public static const CRASH_01: Class;
+        [Embed(source = '../../assets/snd/car/car_02.mp3')] public static const CRASH_02: Class;
+        [Embed(source = '../../assets/snd/car/car_03.mp3')] public static const CRASH_03: Class;
+        [Embed(source = '../../assets/snd/car/car_04.mp3')] public static const CRASH_04: Class;
+        [Embed(source = '../../assets/snd/car/car_05.mp3')] public static const CRASH_05: Class;
 
         //Bkg Music
         [Embed(source = '../../assets/snd/chase.mp3')] public static const Chase: Class;

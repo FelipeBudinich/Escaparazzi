@@ -48,7 +48,7 @@ package {
             faintSound.play();
 
             cameraSound = new FlxSound();
-            cameraSound.loadEmbedded(AssetsRegistry.CRUSH_05, false);
+            cameraSound.loadEmbedded(AssetsRegistry.CRASH_05, false);
             cameraSound.volume = 3;
             cameraSound.play();
             faintSprite = new FlxSprite(96, 56);
