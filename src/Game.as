@@ -100,7 +100,6 @@ package {
         public var fotos: int = 0;
         public var choques: int = 0;
         private var headHUD: FlxSprite;
-        private var timerChoque: Number = 9999;
 
         public function Game() {}
 
@@ -137,12 +136,12 @@ package {
             poofVar = new FlxGroup();
             currentPointGroup = new FlxGroup();
 
-            spawnNewMob(256 + 16, FlxG.height);
-            spawnNewMob(256 + 32, FlxG.height);
-            spawnNewMob(256 + 64, FlxG.height);
-            spawnNewMob(256 + 80, FlxG.height);
-            spawnNewMob(256 + 96, FlxG.height);
-            spawnNewMob(256 + 112, FlxG.height);
+            spawnPaparazzi(util.util.rand(16,256)+ 16, FlxG.height);
+            spawnPaparazzi(0, FlxG.height);
+            spawnPaparazzi(0, FlxG.height);
+            spawnPaparazzi(0, FlxG.height);
+            spawnPaparazzi(0, FlxG.height);
+            spawnPaparazzi(0, FlxG.height);
 
 
             popStar = popStarMob.members[0];
@@ -210,21 +209,9 @@ package {
         }
 
         override public function update(): void {
-
-            explosionClear();
-            poofClear();
-
-            if (winnar == true) {
-                winnarTimer -= FlxG.elapsed;
-            }
-
-            if (timerChoque > 0) {
-                timerChoque -= FlxG.elapsed;
-            } else {
-                chocarSnd();
-                timerChoque = 9999;
-            }
-
+			
+			super.update();
+			
             //Remove coins from play after MoneyzTimer elapses
             if (moneyzTimer > 0 && moneyzPurse.members.length > 0) {
                 moneyzTimer -= FlxG.elapsed;
@@ -241,28 +228,9 @@ package {
                     moneyzPurse.members.pop();
                 }
             }
-				switch (moneyzAmount) {
-					case 0: moneyzHUD.loadGraphic(AssetsRegistry.NEED_05, true, false, 81, 18); break;
-					case 1: moneyzHUD.loadGraphic(AssetsRegistry.NEED_04, true, false, 81, 18); break;
-					case 2: moneyzHUD.loadGraphic(AssetsRegistry.NEED_03, true, false, 81, 18); break;
-					case 3: moneyzHUD.loadGraphic(AssetsRegistry.NEED_02, true, false, 81, 18); break;
-					case 4: moneyzHUD.loadGraphic(AssetsRegistry.NEED_01, true, false, 81, 18); break;
-					case 5: moneyzHUD.loadGraphic(AssetsRegistry.NEED_00, true, false, 81, 18); break;
-				}
 			
-				switch (fotos + choques) {
-					
-					case 0: headHUD.loadGraphic(AssetsRegistry.HEAD_00, true, false, 81, 18); break;
-					case 1: headHUD.loadGraphic(AssetsRegistry.HEAD_01, true, false, 81, 18); break;
-					case 2: headHUD.loadGraphic(AssetsRegistry.HEAD_02, true, false, 81, 18); break;
-					case 3: headHUD.loadGraphic(AssetsRegistry.HEAD_03, true, false, 81, 18); break;
-					case 4: headHUD.loadGraphic(AssetsRegistry.HEAD_04, true, false, 81, 18); break;
-					case 5: headHUD.loadGraphic(AssetsRegistry.HEAD_05, true, false, 81, 18); break;
-					case 6: headHUD.loadGraphic(AssetsRegistry.HEAD_06, true, false, 81, 18); break;
-					case 7: headHUD.loadGraphic(AssetsRegistry.HEAD_07, true, false, 81, 18); break;
-					case 8: headHUD.loadGraphic(AssetsRegistry.HEAD_08, true, false, 81, 18); break;
-				}
-
+			updateHUD();
+			
             if (cashGrab > 0) {
                 cashGrab -= FlxG.elapsed;
             } else {
@@ -271,7 +239,7 @@ package {
 
             }
 
-            super.update();
+            
 
             if (flashTimer > 0) {
                 flashTimer -= FlxG.elapsed;
@@ -284,32 +252,11 @@ package {
                 red = 1.0;
             }
 
-
-            //Reducir Timer Fotos
+            //Update timers
             timerPhoto -= FlxG.elapsed;
-            //Agregar Paparazzi
+
             timerPaparazzi -= FlxG.elapsed
-
-            //timer input
-            if (winnar == false) {
-                inputTimer -= FlxG.elapsed;
-
-                if (FlxG.keys.UP && popStar.facing == FlxSprite.UP || FlxG.keys.W && popStar.facing == FlxSprite.UP) {
-
-                } else if (FlxG.keys.DOWN && popStar.facing == FlxSprite.DOWN || FlxG.keys.S && popStar.facing == FlxSprite.DOWN) {
-
-                } else if (FlxG.keys.LEFT && popStar.facing == FlxSprite.LEFT || FlxG.keys.A && popStar.facing == FlxSprite.LEFT) {
-
-                } else if (FlxG.keys.RIGHT && popStar.facing == FlxSprite.RIGHT || FlxG.keys.D && popStar.facing == FlxSprite.RIGHT) {
-
-                } else if (FlxG.keys.UP || FlxG.keys.DOWN || FlxG.keys.LEFT || FlxG.keys.RIGHT || FlxG.keys.A || FlxG.keys.S || FlxG.keys.D || FlxG.keys.W) {
-
-                    inputTimer = 15.0;
-
-                }
-
-            }
-
+			
             if (timerPaparazzi < 0) {
 
                 addFollower = true;
@@ -329,40 +276,46 @@ package {
                     popStarSpeed -= 4;
                 }
             }
-            //	Colisión
-
+			
+			
+			
             if (winnar == false) {
-                FlxU.overlap(popStar, popStarMob, deadpopStar);
-                FlxU.overlap(popStar, traffic, chocar);
-                FlxU.overlap(popStar, opositeTraffic, chocarOposite);
-            }
-
-            FlxU.overlap(popStar, taxiLane, win);
-            FlxU.overlap(traffic, traffic, correrse);
-            FlxU.overlap(traffic, opositeTraffic, correrse);
-            FlxU.overlap(opositeTraffic, opositeTraffic, correrse);
-            FlxU.overlap(popStarMob, traffic, deadPaparazzo);
-            FlxU.overlap(popStarMob, opositeTraffic, deadOpositePaparazzo);
-            FlxU.overlap(popStar, moneyzPurse, kaching);
-
-            if ((FlxG.keys.UP || FlxG.keys.W) && popStar.facing != FlxSprite.DOWN) {
-                popStar.facing = FlxSprite.UP;
-            } else if ((FlxG.keys.DOWN || FlxG.keys.S) && popStar.facing != FlxSprite.UP) {
-                popStar.facing = FlxSprite.DOWN;
-            } else if ((FlxG.keys.LEFT || FlxG.keys.A) && popStar.facing != FlxSprite.RIGHT) {
-                popStar.facing = FlxSprite.LEFT;
-            } else if ((FlxG.keys.RIGHT || FlxG.keys.D) && popStar.facing != FlxSprite.LEFT) {
-                popStar.facing = FlxSprite.RIGHT;
-            }
-
-            if (getTimer() > nextMove) {
-                moveMob();
-                moveTraffic();
-                moveOpositeTraffic();
-                fadeBonus();
-                nextMove = getTimer() + popStarSpeed;
-            }
-
+				
+				handlePlayerInput();
+				
+				if (getTimer() > nextMove) {
+				
+					moveMob();
+					moveTraffic();
+					moveOpositeTraffic();
+					fadeBonus();
+					nextMove = getTimer() + popStarSpeed;
+				
+				FlxU.overlap(popStar, popStarMob, deadpopStar);
+                FlxU.overlap(popStar, traffic, crash);
+                FlxU.overlap(popStar, opositeTraffic, crash);
+				
+            
+				FlxU.overlap(traffic, opositeTraffic, correrse);
+            
+				FlxU.overlap(popStarMob, traffic, deadPaparazzo);
+				FlxU.overlap(popStarMob, opositeTraffic, deadOpositePaparazzo);
+				FlxU.overlap(popStar, moneyzPurse, collectMoney);
+					
+					}
+				
+				
+				
+			} else {
+				
+				winnarTimer -= FlxG.elapsed;
+				
+			}
+			FlxU.overlap(popStar, taxiLane, takeCab);
+			explosionClear();
+			poofClear();
+			
+            
         }
 
         private function correrse(object_1: FlxObject, object_2: FlxObject): void {
@@ -383,18 +336,7 @@ package {
             }
         }
 
-        private function chocarSnd(): void {
-
-            switch (util.util.rand(1, 5)) {
-            case 1: FlxG.play(AssetsRegistry.CRASH_01); break;
-            case 2: FlxG.play(AssetsRegistry.CRASH_02); break;
-            case 3: FlxG.play(AssetsRegistry.CRASH_03); break;
-            case 4: FlxG.play(AssetsRegistry.CRASH_04); break;
-            case 5: FlxG.play(AssetsRegistry.CRASH_05); break;
-            }
-        }
-
-        private function chocar(object1: FlxObject, object2: FlxObject): void {
+        private function crash(object1: FlxObject, object2: FlxObject): void {
             Data.currentScore += 100;
             currentPointString = Data.currentScore.toString();
             currentPointHUD.text = currentPointString;
@@ -405,11 +347,7 @@ package {
             pointHUD.setFormat("Nokia", 8, 0x55ffff55);
             currentPointGroup.add(pointHUD);
 
-            //Hack culiao feo X-D
-            if (timerChoque > 1) {
-                timerChoque = 0.1;
-            }
-
+			crashSnd();
 
             if (timerPhoto < 0) {
                 choques += 1;
@@ -422,50 +360,15 @@ package {
                 FlxG.state = new Deaded();
             }
             FlxG.quake.start(0.01, 0.1);
+			
+			explosion(object2.x, object2.y);
+			
             traffic.remove(object2, true);
-            explosion(object2.x, object2.y);
-
-
-           
+            
             spawnMoreCars();
 
 
         }
-
-        private function chocarOposite(object1: FlxObject, object2: FlxObject): void {
-            Data.currentScore += 100;
-            currentPointString = Data.currentScore.toString();
-            currentPointHUD.text = currentPointString;
-
-            pointBonus = 100;
-            pointString = pointBonus.toString();
-            pointHUD = new FlxText(object1.x, object1.y, 120, pointString);
-            pointHUD.setFormat("Nokia", 8, 0x55ffff55);
-            currentPointGroup.add(pointHUD);
-
-            //Hack culiao feo X-D
-            if (timerChoque > 1) {
-                timerChoque = 0.1;
-            }
-
-            if (timerPhoto < 0) {
-                choques += 1;
-                red = 1.5;
-                flashTimer = 0.1;
-                timerPhoto = 0.4 * FlxU.random() + 0.1;
-            }
-
-            if (choques + fotos > 8) {
-                FlxG.state = new Deaded();
-            }
-            FlxG.quake.start(0.01, 0.1);
-            opositeTraffic.remove(object2, true);
-            explosion(object2.x, object2.y);
-
-            spawnMoreCars();
-
-        }
-
 
         private function deadPaparazzo(object1: FlxObject, object2: FlxObject): void {
             Data.currentScore += 250;
@@ -489,16 +392,12 @@ package {
             }
 
             if (moneyzPurse.members.length < 1) {
-                addManey(object1.x, object1.y);
+                spawnMoney(object1.x, object1.y);
             }
 
             explosion(object1.x, object1.y);
 
-            //Hack
-            if (timerChoque > 1) {
-                timerChoque = 0.1;
-            }
-
+			crashSnd();
         }
 
         private function fadeBonus(): void {
@@ -530,16 +429,12 @@ package {
             }
 
             if (moneyzPurse.members.length < 1) {
-                addManey(object1.x, object1.y);
+                spawnMoney(object1.x, object1.y);
             }
 
             explosion(object1.x, object1.y);
 
-            //Hack culiao feo X-D
-            if (timerChoque > 1) {
-                timerChoque = 0.1;
-            }
-
+			crashSnd();
         }
 
 
@@ -547,20 +442,12 @@ package {
         private function deadpopStar(object1: FlxObject, object2: FlxObject): void {
 
             if (timerPhoto < 0) {
-
                 cameraFlash(object1.x, object1.y);
-
                 fotos += 1;
                 flash = 1.5;
                 flashTimer = 0.1;
                 timerPhoto = 0.4 * FlxU.random() + 0.1;
-                switch (util.util.rand(1, 5)) {
-                case 1: FlxG.play(AssetsRegistry.Camara_01); break;
-                case 2: FlxG.play(AssetsRegistry.Camara_02); break;
-                case 3: FlxG.play(AssetsRegistry.Camara_03); break;
-                case 4: FlxG.play(AssetsRegistry.Camara_04); break;
-                case 5: FlxG.play(AssetsRegistry.Camara_05); break;
-                }
+                cameraSnd();
             }
 
             if (fotos + choques > 8) {
@@ -593,8 +480,6 @@ package {
                 spawnTaxi(0, util.util.rand(32, 96));
               
             }
-
-            if (winnar == false) {
 
                 for (var s: int = traffic.members.length - 1; s > 0; s--) {
                     traffic.members[s].x += 16;
@@ -630,12 +515,10 @@ package {
                         taxiLane.members[z].y = 224;
                     }
                 }
-            }
+
         }
 
         private function moveOpositeTraffic(): void {
-
-            if (winnar == false) {
 
                 for (var s: int = opositeTraffic.members.length - 1; s > 0; s--) {
                     opositeTraffic.members[s].x -= 16;
@@ -655,14 +538,11 @@ package {
                     }
                 }
 
-            }
         }
 
 
         private function moveMob(): void {
 
-
-            if (winnar == false) {
                 var oldX: int = popStar.x;
                 var oldY: int = popStar.y;
 
@@ -675,7 +555,7 @@ package {
                 case FlxSprite.LEFT:
                     if (popStar.x == 0) {
                         popStar.x = FlxG.width - 16;
-                    } else if (inputTimer < .1) {
+                    } else if (inputTimer <= .1) {
 					} else {	
                         popStar.x -= 16;
                     }
@@ -684,7 +564,7 @@ package {
                 case FlxSprite.RIGHT:
                     if (popStar.x == FlxG.width - 16) {
                         popStar.x = 0;
-                    } else if (inputTimer < .1) {
+                    } else if (inputTimer <= .1) {
 					} else {
                         popStar.x += 16;
                     }
@@ -693,7 +573,7 @@ package {
                 case FlxSprite.UP:
                     if (popStar.y == 0) {
                         popStar.y = FlxG.height - 16;
-                    } else if (inputTimer < .1) {
+                    } else if (inputTimer <= .1) {
 					} else {
                         popStar.y -= 16;
                     }
@@ -702,7 +582,7 @@ package {
                 case FlxSprite.DOWN:
                     if (popStar.y == FlxG.height - 16) {
                         popStar.y = 0;
-                    } else if (inputTimer < .1) {
+                    } else if (inputTimer <= .1) {
 					} else {
                         popStar.y += 16;
                     }
@@ -725,48 +605,39 @@ package {
 
                 if (addFollower) {
 					
-                    switch (util.util.rand(1, (1 + moneyzAmount))) {
+                    switch (util.util.rand(1, (moneyzAmount))) {
                     case 1:
-                        spawnNewMob(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
                         break;
 
                     case 2:
-                        spawnNewMob(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
                         break;
 
                     case 3:
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
                         break;
 
                     case 4:
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
                         break;
 
                     case 5:
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
                         break;
 
                     case 6:
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        break;
-
-                    case 7:
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
-                        spawnNewMob(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
+                        spawnPaparazzi(oldX, oldY);
                         break;
                     }
 
@@ -775,12 +646,12 @@ package {
 					//add new car
 					spawnMoreCars();
                 }
-            }
+            
         }
 
-        private function spawnNewMob(_x: int, _y: int): void {
-
+        private function spawnPaparazzi(_x: int, _y: int): void {
             paparazzos = new FlxSprite(_x, _y);
+			
             switch (util.util.rand(1, 5)) {
             case 1: paparazzos.loadGraphic(AssetsRegistry.PAPARAZZO_01, true, false, 16, 16, true); break;
             case 2: paparazzos.loadGraphic(AssetsRegistry.PAPARAZZO_02, true, false, 16, 16, true); break;
@@ -796,7 +667,6 @@ package {
         }
 
         private function spawnCar(_x: int, _y: int): void {
-
             car = new FlxSprite(_x, _y);
             switch (util.util.rand(1, 4)) {
             case 1: car.loadGraphic(AssetsRegistry.CAR_01, true, false, 32, 16, true); break;
@@ -811,7 +681,6 @@ package {
         }
 
         private function spawnOpositeCar(_x: int, _y: int): void {
-
             carB = new FlxSprite(_x, _y);
             switch (util.util.rand(1, 4)) {
             case 1: carB.loadGraphic(AssetsRegistry.CARB_01, true, false, 32, 16, true); break;
@@ -835,7 +704,7 @@ package {
         }
 
 
-        private function win(object1: FlxObject, object2: FlxObject): void {
+        private function takeCab(object1: FlxObject, object2: FlxObject): void {
             if (moneyzAmount > 4) {
 
                 winnar = true;
@@ -881,15 +750,14 @@ package {
                 explodeGroup.add(explodeSprite);
                 explodeGroup.add(pointHUD);
                 popStarMob.members.pop();
-               
-				playCoinSnd();
+				coinSnd();
 				
                 winnarTimer = 0.1;
 
             }
         }
 
-        private function addManey(_x: int, _y: int): void {
+        private function spawnMoney(_x: int, _y: int): void {
             moneyzSprite = new FlxSprite(_x, _y);
             moneyzSprite.loadGraphic(AssetsRegistry.MANEY, true, false, 8, 8);
             moneyzSprite.addAnimation('bling', [0, 1], 5, true);
@@ -917,11 +785,11 @@ package {
         }
 
         private function explosionClear(): void {
-            if (explodeGroup.members.length >= 1) {
+			if (explodeGroup.members.length >= 1) {
                 explodeTimer -= FlxG.elapsed;
-            }
+			}
 
-            if (explodeTimer <= 0 && explodeGroup.members.length >= 1) {
+			if (explodeTimer <= 0 && explodeGroup.members.length >= 1) {
 
                 for (var i: int = explodeGroup.members.length; i > 0; i--) {
                     explodeGroup.members.pop();
@@ -939,18 +807,8 @@ package {
             }
 
         }
-		
-		private function playCoinSnd(): void {
-			switch (util.util.rand(1, 5)) {
-            case 1: FlxG.play(AssetsRegistry.COIN_01); break;
-            case 2: FlxG.play(AssetsRegistry.COIN_02); break;
-            case 3: FlxG.play(AssetsRegistry.COIN_03); break;
-            case 4: FlxG.play(AssetsRegistry.COIN_04); break;
-            case 5: FlxG.play(AssetsRegistry.COIN_05); break;
-            }
-		}
-		
-        private function kaching(object1: FlxObject, object2: FlxObject): void {
+
+        private function collectMoney(object1: FlxObject, object2: FlxObject): void {
             Data.currentScore += 500;
             currentPointString = Data.currentScore.toString();
             currentPointHUD.text = currentPointString;
@@ -964,8 +822,83 @@ package {
             moneyzPurse.members.pop();
 
             cashGrab = 0.3;
-            playCoinSnd();
+            coinSnd();
         }
+		
+		private function handlePlayerInput(): void {
+		
+            inputTimer -= FlxG.elapsed;
+
+            if ((FlxG.keys.UP || FlxG.keys.W) && popStar.facing != FlxSprite.DOWN) {
+					popStar.facing = FlxSprite.UP;
+            } else if ((FlxG.keys.DOWN || FlxG.keys.S) && popStar.facing != FlxSprite.UP) {
+					popStar.facing = FlxSprite.DOWN;
+            } else if ((FlxG.keys.LEFT || FlxG.keys.A) && popStar.facing != FlxSprite.RIGHT) {
+					popStar.facing = FlxSprite.LEFT;
+            } else if ((FlxG.keys.RIGHT || FlxG.keys.D) && popStar.facing != FlxSprite.LEFT) {
+					popStar.facing = FlxSprite.RIGHT;
+            } 
+				
+			if (FlxG.keys.UP || FlxG.keys.DOWN || FlxG.keys.LEFT || FlxG.keys.RIGHT || FlxG.keys.A || FlxG.keys.S || FlxG.keys.D || FlxG.keys.W) {
+                    inputTimer = 15.0;
+            }
+
+		}
+		
+		private function updateHUD(): void {
+			switch (moneyzAmount) {
+				case 0: moneyzHUD.loadGraphic(AssetsRegistry.NEED_05, true, false, 81, 18); break;
+				case 1: moneyzHUD.loadGraphic(AssetsRegistry.NEED_04, true, false, 81, 18); break;
+				case 2: moneyzHUD.loadGraphic(AssetsRegistry.NEED_03, true, false, 81, 18); break;
+				case 3: moneyzHUD.loadGraphic(AssetsRegistry.NEED_02, true, false, 81, 18); break;
+				case 4: moneyzHUD.loadGraphic(AssetsRegistry.NEED_01, true, false, 81, 18); break;
+				case 5: moneyzHUD.loadGraphic(AssetsRegistry.NEED_00, true, false, 81, 18); break;
+			}
+			
+			switch (fotos + choques) {
+				case 0: headHUD.loadGraphic(AssetsRegistry.HEAD_00, true, false, 81, 18); break;
+				case 1: headHUD.loadGraphic(AssetsRegistry.HEAD_01, true, false, 81, 18); break;
+				case 2: headHUD.loadGraphic(AssetsRegistry.HEAD_02, true, false, 81, 18); break;
+				case 3: headHUD.loadGraphic(AssetsRegistry.HEAD_03, true, false, 81, 18); break;
+				case 4: headHUD.loadGraphic(AssetsRegistry.HEAD_04, true, false, 81, 18); break;
+				case 5: headHUD.loadGraphic(AssetsRegistry.HEAD_05, true, false, 81, 18); break;
+				case 6: headHUD.loadGraphic(AssetsRegistry.HEAD_06, true, false, 81, 18); break;
+				case 7: headHUD.loadGraphic(AssetsRegistry.HEAD_07, true, false, 81, 18); break;
+				case 8: headHUD.loadGraphic(AssetsRegistry.HEAD_08, true, false, 81, 18); break;
+			}
+
+		}
+				
+		private function coinSnd(): void {
+			switch (util.util.rand(1, 5)) {
+            case 1: FlxG.play(AssetsRegistry.COIN_01); break;
+            case 2: FlxG.play(AssetsRegistry.COIN_02); break;
+            case 3: FlxG.play(AssetsRegistry.COIN_03); break;
+            case 4: FlxG.play(AssetsRegistry.COIN_04); break;
+            case 5: FlxG.play(AssetsRegistry.COIN_05); break;
+            }
+		}
+		
+		private function crashSnd(): void {
+            switch (util.util.rand(1, 5)) {
+				case 1: FlxG.play(AssetsRegistry.CRASH_01); break;
+				case 2: FlxG.play(AssetsRegistry.CRASH_02); break;
+				case 3: FlxG.play(AssetsRegistry.CRASH_03); break;
+				case 4: FlxG.play(AssetsRegistry.CRASH_04); break;
+				case 5: FlxG.play(AssetsRegistry.CRASH_05); break;
+            }
+        }
+		
+		private function cameraSnd(): void {
+			switch (util.util.rand(1, 5)) {
+				case 1: FlxG.play(AssetsRegistry.Camara_01); break;
+				case 2: FlxG.play(AssetsRegistry.Camara_02); break;
+				case 3: FlxG.play(AssetsRegistry.Camara_03); break;
+				case 4: FlxG.play(AssetsRegistry.Camara_04); break;
+				case 5: FlxG.play(AssetsRegistry.Camara_05); break;
+             }	
+		}
+		
     }
 
 }
