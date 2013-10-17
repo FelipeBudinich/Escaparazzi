@@ -553,7 +553,7 @@ package {
 
                 switch (popStar.facing) {
                 case FlxSprite.LEFT:
-                    if (popStar.x == 0) {
+                    if (popStar.x <= 0) {
                         popStar.x = FlxG.width - 16;
                     } else if (inputTimer <= .1) {
 					} else {	
@@ -562,7 +562,7 @@ package {
                     break;
 
                 case FlxSprite.RIGHT:
-                    if (popStar.x == FlxG.width - 16) {
+                    if (popStar.x >= FlxG.width - 16) {
                         popStar.x = 0;
                     } else if (inputTimer <= .1) {
 					} else {
@@ -571,7 +571,7 @@ package {
                     break;
 
                 case FlxSprite.UP:
-                    if (popStar.y == 0) {
+                    if (popStar.y <= 0) {
                         popStar.y = FlxG.height - 16;
                     } else if (inputTimer <= .1) {
 					} else {
@@ -580,7 +580,7 @@ package {
                     break;
 
                 case FlxSprite.DOWN:
-                    if (popStar.y == FlxG.height - 16) {
+                    if (popStar.y >= FlxG.height - 16) {
                         popStar.y = 0;
                     } else if (inputTimer <= .1) {
 					} else {
