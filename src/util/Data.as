@@ -4,7 +4,8 @@ package util {
      * @author Felipe Budinich
      */
 
-    import Game;
+	import flash.display.Scene;
+    import scenes.*;
     import flash.utils.ByteArray;
     import mx.utils.Base64Encoder;
     import mx.utils.Base64Decoder;

@@ -1,4 +1,4 @@
-package {
+package scenes{
     /**
      * ...
      * @author Felipe Budinich
@@ -13,14 +13,11 @@ package {
     import util.Data;
     import org.flixel.data.FlxKeyboard;
 
-    //Shader
-    import flash.display.Shader;
-    import flash.filters.*;
-    import flash.geom.Point;
-    import flash.geom.Rectangle;
-
     //Asset Registry
     import registry.AssetsRegistry;
+	
+	//Scenes
+	import scenes.*;
 
     public class Winrar extends FlxState {
 

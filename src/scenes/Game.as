@@ -1,10 +1,11 @@
 ﻿
-package {
+package scenes{
     /**
      * ...
      * @author Felipe Budinich
      */
 
+	import mx.core.FlexSprite;
     import org.flixel.*;
     import flash.display.Bitmap;
     import flash.display.BitmapData;
@@ -15,7 +16,10 @@ package {
 
     //Asset Registry
     import registry.AssetsRegistry;
-
+	
+	//Scenes
+	//import scenes.*;
+	
     //Required for Shaders
     import flash.display.Shader;
     import flash.filters.*;
@@ -23,15 +27,9 @@ package {
     import flash.geom.Rectangle;
 
     public class Game extends FlxState {
-        //Shader
-        
-        private var coolShader: Shader = new Shader(new AssetsRegistry.FilterCode());
-        private var coolFilter: ShaderFilter = new ShaderFilter(coolShader);
+   
         private var offsetRX: Number = 0.0;
         private var offsetRY: Number = 0.0;
-        private var flash: Number = 1.1;
-        private var red: Number = 1.0;
-        private var flashTimer: Number = 0.0;
 
         private var pointBonus: int;
         private var pointString: String;
@@ -44,8 +42,16 @@ package {
         private var tvShader: Shader = new Shader(new AssetsRegistry.TvShaderData());
         private var tvFilter: ShaderFilter = new ShaderFilter(tvShader);
 
-        //scanlines overlay
+        //Overlay
         private var scanlines: FlxSprite;
+		private var flashScreen: FlxSprite;
+		private var bloodyScreen: FlxSprite;
+		private var flash: Number = 0;
+        private var red: Number = 0;
+        private var flashTimer: Number = 0.0;
+		
+		//background
+		private var background: FlxSprite;
 
         //explosions
         private var explodeSprite: FlxSprite;
@@ -110,10 +116,9 @@ package {
             } else {
                 screen.fill(bgColor);
             }
-
-            coolShader.data.flash.value = [flash];
-            coolShader.data.red.value = [red];
-            FlxG.buffer.applyFilter(FlxG.buffer, new Rectangle(0, 0, FlxG.width, FlxG.height), new Point(0, 0), coolFilter);
+			
+			flashScreen.alpha = flash;
+			bloodyScreen.alpha = red;
         }
 
 
@@ -204,6 +209,20 @@ package {
             scanlines.alpha = .2;
             add(scanlines);
 			
+			//Bloody Screen
+			bloodyScreen = new FlxSprite(0, 0);
+			bloodyScreen.loadGraphic(AssetsRegistry.BLOODYSCREEN, false, false, 320, 240);
+			bloodyScreen.alpha = 0;
+			bloodyScreen.blend = "add";
+			add(bloodyScreen);
+			
+			//Flash Screen
+			flashScreen = new FlxSprite(0, 0);
+			flashScreen.loadGraphic(AssetsRegistry.FLASHSCREEN, false, false, 320, 240);
+			flashScreen.alpha = 0;
+			flashScreen.blend = "add";
+			add(flashScreen);
+			
 			//Play Music
 			FlxG.playMusic(AssetsRegistry.Chase, 1.0);
         }
@@ -243,14 +262,11 @@ package {
 
             if (flashTimer > 0) {
                 flashTimer -= FlxG.elapsed;
-                flash -= 0.1;
-                if (red > 1.0) {
-                    red -= 0.1
+                flash -= 0.3;
+                if (red > 0) {
+                    red -= 0.3
                 }
-            } else {
-                flash = 1.1;
-                red = 1.0;
-            }
+            } 
 
             //Update timers
             timerPhoto -= FlxG.elapsed;
@@ -351,7 +367,7 @@ package {
 
             if (timerPhoto < 0) {
                 choques += 1;
-                red = 1.5;
+                red = 1;
                 flashTimer = 0.1;
                 timerPhoto = 0.4 * FlxU.random() + 0.1;
             }
@@ -444,8 +460,10 @@ package {
             if (timerPhoto < 0) {
                 cameraFlash(object1.x, object1.y);
                 fotos += 1;
-                flash = 1.5;
+                flash = .5;
                 flashTimer = 0.1;
+				flashScreen.x = util.util.rand( -8, 8);
+				flashScreen.y = util.util.rand( -8, 8);
                 timerPhoto = 0.4 * FlxU.random() + 0.1;
                 cameraSnd();
             }

@@ -1,4 +1,4 @@
-package {
+package scenes{
     /**
      * ...
      * @author Felipe Budinich

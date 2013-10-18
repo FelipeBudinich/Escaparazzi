@@ -5,15 +5,16 @@ package registry {
      */
     public class AssetsRegistry {
 		//Shaders
-		//Flash Shader
-		[Embed(source = '../../assets/shader/flash.pbj', mimeType = 'application/octet-stream')] public static const FilterCode: Class;
 		//Burnt Pixel Shader
 		[Embed(source = '../../assets/shader/crt.pbj', mimeType = "application/octet-stream")] public static const TvShaderData: Class;
 		
         //Overlay
         [Embed(source = '../../assets/gfx/noise_01.png')] public static const NOISE_01: Class;
-
-        //Entity Sprites
+		[Embed(source = '../../assets/gfx/bloody_screen.png')] public static const BLOODYSCREEN: Class;
+        [Embed(source = '../../assets/gfx/flash_screen.png')] public static const FLASHSCREEN: Class;
+		
+		
+		//Entity Sprites
         //Player Sprite
         [Embed(source = '../../assets/gfx/star.png')] public static const PLAYER: Class;
 
