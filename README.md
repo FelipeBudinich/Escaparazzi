@@ -8,8 +8,7 @@ Escape from the Paparazzi! Don't let them take too many pictures or you'll be lo
 - http://www.kongregate.com/games/FelipeBudinich/escaparazzi
 - http://felipebudinich.itch.io/escaparazzi
 
-**v 1.2.1**
-- Optimization: removed duplicated variable comparisons.
-- Optimization: removed duplicated functions.
-- New Feature: Starting point determined at random.
-- Bug fix: Wrap around bug on the X axis caused by random starting point.
+**v 1.3.3**
+- Optimization: Changed project configurantion to build using latest flash player
+- New Feature: Preloader.
+- New Feature: Charity Game Jam donation button targeting towards techo.org.

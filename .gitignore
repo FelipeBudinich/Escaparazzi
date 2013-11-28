@@ -7,6 +7,10 @@ bin/
 ############
 *.7z
 
+# Source Media #
+################
+*.PSD
+
 # OS generated files #
 ######################
 .DS_Store
