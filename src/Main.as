@@ -9,7 +9,7 @@ package {
 	import scenes.*;
 
     [SWF(width = "640", height = "480", frameRate = "60", backgroundColor = "#000000")]
-
+	[Frame(factoryClass="Preloader")]
 
     public class Main extends FlxGame {
         private var screenRatio: int;

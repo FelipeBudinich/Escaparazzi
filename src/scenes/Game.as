@@ -125,6 +125,7 @@ package scenes{
 
 
         override public function create(): void {
+			stage.focus = stage;
             Data.currentScore = 0;
 
             addFollower = false;
@@ -207,6 +208,7 @@ package scenes{
             scanlines = new FlxSprite(0, 0);
             scanlines.loadGraphic(AssetsRegistry.NOISE_01, false, false, 320, 240);
             scanlines.alpha = .2;
+			scanlines.blend = "add";
             add(scanlines);
 			
 			//Bloody Screen
