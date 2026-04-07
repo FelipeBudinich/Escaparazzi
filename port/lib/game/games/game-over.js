@@ -18,7 +18,13 @@ ig.module(
     clearColor: '#000000',
 
     init: function () {
+      this.core = window.EscaparazziCore || {};
       this.context = ig.global.Escaparazzi || {};
+      this.debugConfig = this.core.DEBUG_CONFIG || {
+        enabled: false,
+        renderOverlay: false,
+        logEvents: false
+      };
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
@@ -37,6 +43,13 @@ ig.module(
       window.addEventListener('keydown', this.keyDownHandler, false);
 
       setDocumentState(this.session, this.session && this.session.currentRun ? this.session.currentRun.score : 0);
+
+      if (typeof this.core.debugLog === 'function') {
+        this.core.debugLog('screen-enter', {
+          screen: 'game-over',
+          score: this.session && this.session.currentRun ? this.session.currentRun.score : 0
+        });
+      }
     },
 
     onKeyDown: function (_event) {
@@ -76,17 +89,27 @@ ig.module(
       this.media.images.gameOver.draw(40, 0);
 
       ctx.save();
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#f4f1de';
-      ctx.font = (8 * ig.system.scale) + 'px monospace';
-      ctx.fillText('Score ' + score, ig.system.getDrawPos(160), ig.system.getDrawPos(210));
-      ctx.fillText('Press any key or click to restart', ig.system.getDrawPos(160), ig.system.getDrawPos(224));
-      ctx.restore();
-
-      ctx.save();
       ctx.globalAlpha = 0.2;
       this.media.images.scanlines.draw(0, 0);
       ctx.restore();
+
+      if (
+        this.core &&
+        typeof this.core.isDebugOverlayEnabled === 'function' &&
+        this.core.isDebugOverlayEnabled(this.debugConfig) &&
+        typeof this.core.renderDebugOverlay === 'function'
+      ) {
+        this.core.renderDebugOverlay({
+          context: ctx,
+          scale: ig.system.scale,
+          drawPos: ig.system.getDrawPos.bind(ig.system),
+          lines: [
+            'screen: game-over',
+            'score: ' + score,
+            'restart ready: true'
+          ]
+        });
+      }
     }
   });
 });

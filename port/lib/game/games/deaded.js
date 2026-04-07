@@ -17,7 +17,13 @@ ig.module(
     clearColor: '#000000',
 
     init: function () {
+      this.core = window.EscaparazziCore || {};
       this.context = ig.global.Escaparazzi || {};
+      this.debugConfig = this.core.DEBUG_CONFIG || {
+        enabled: false,
+        renderOverlay: false,
+        logEvents: false
+      };
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
@@ -35,6 +41,13 @@ ig.module(
       }
 
       setDocumentState(this.session, this.session && this.session.currentRun ? this.session.currentRun.score : 0);
+
+      if (typeof this.core.debugLog === 'function') {
+        this.core.debugLog('screen-enter', {
+          screen: 'deaded',
+          score: this.session && this.session.currentRun ? this.session.currentRun.score : 0
+        });
+      }
     },
 
     update: function () {
@@ -62,16 +75,27 @@ ig.module(
       ctx.restore();
 
       ctx.save();
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#f4f1de';
-      ctx.font = (8 * ig.system.scale) + 'px monospace';
-      ctx.fillText('Score ' + score, ig.system.getDrawPos(160), ig.system.getDrawPos(204));
-      ctx.restore();
-
-      ctx.save();
       ctx.globalAlpha = 0.2;
       this.media.images.scanlines.draw(0, 0);
       ctx.restore();
+
+      if (
+        this.core &&
+        typeof this.core.isDebugOverlayEnabled === 'function' &&
+        this.core.isDebugOverlayEnabled(this.debugConfig) &&
+        typeof this.core.renderDebugOverlay === 'function'
+      ) {
+        this.core.renderDebugOverlay({
+          context: ctx,
+          scale: ig.system.scale,
+          drawPos: ig.system.getDrawPos.bind(ig.system),
+          lines: [
+            'screen: deaded',
+            'score: ' + score,
+            'elapsed: ' + Math.round(this.elapsedMs) + '/' + this.durationMs
+          ]
+        });
+      }
     }
   });
 });

@@ -53,7 +53,13 @@ ig.module(
     transitioning: false,
 
     init: function () {
+      this.core = window.EscaparazziCore || {};
       this.context = ig.global.Escaparazzi || {};
+      this.debugConfig = this.core.DEBUG_CONFIG || {
+        enabled: false,
+        renderOverlay: false,
+        logEvents: false
+      };
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
@@ -77,6 +83,13 @@ ig.module(
 
       if (window.EscaparazziBootState && window.EscaparazziBootState.markReady) {
         window.EscaparazziBootState.markReady();
+      }
+
+      if (typeof this.core.debugLog === 'function') {
+        this.core.debugLog('screen-enter', {
+          screen: 'intro',
+          highScore: this.saveData.highScore
+        });
       }
     },
 
@@ -145,6 +158,13 @@ ig.module(
       this.saveData = this.session.resetSave();
       this.resetFlashTimerMs = 1200;
       setDocumentState('intro', this.saveData.highScore);
+
+      if (typeof this.core.debugLog === 'function') {
+        this.core.debugLog('save-reset', {
+          screen: 'intro',
+          highScore: this.saveData.highScore
+        });
+      }
     },
 
     startNextScreen: function () {
@@ -189,20 +209,23 @@ ig.module(
         ctx.restore();
       }
 
-      ctx.save();
-      ctx.textAlign = 'center';
-      ctx.font = (8 * scale) + 'px monospace';
-      ctx.fillStyle = '#f4f1de';
-      ctx.fillText('High Score ' + this.saveData.highScore, ig.system.getDrawPos(160), ig.system.getDrawPos(206));
-      ctx.fillStyle = '#fff6a8';
-      ctx.fillText('Click Play or press any key', ig.system.getDrawPos(160), ig.system.getDrawPos(218));
-      ctx.fillStyle = '#97cee3';
-      ctx.fillText(
-        this.resetFlashTimerMs > 0 ? 'High scores reset' : 'Press R+E to reset highscores',
-        ig.system.getDrawPos(160),
-        ig.system.getDrawPos(230)
-      );
-      ctx.restore();
+      if (
+        this.core &&
+        typeof this.core.isDebugOverlayEnabled === 'function' &&
+        this.core.isDebugOverlayEnabled(this.debugConfig) &&
+        typeof this.core.renderDebugOverlay === 'function'
+      ) {
+        this.core.renderDebugOverlay({
+          context: ctx,
+          scale: scale,
+          drawPos: ig.system.getDrawPos.bind(ig.system),
+          lines: [
+            'screen: intro',
+            'high score: ' + this.saveData.highScore,
+            'reset flash: ' + Math.max(0, Math.round(this.resetFlashTimerMs))
+          ]
+        });
+      }
 
       // TODO: Restore the charity button hit area and external-link behavior once the full intro menu pass begins.
     }
