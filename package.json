@@ -1,0 +1,14 @@
+{
+  "name": "escaparazzi-port-host",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Minimal Express host for the Escaparazzi Impact.js port workspace.",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node --test port/test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}

@@ -1,0 +1,80 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+
+const ASSET_PATHS = [
+  'assets/gfx/background.png',
+  'assets/gfx/intro.png',
+  'assets/gfx/game_over.png',
+  'assets/gfx/winscreen.png',
+  'assets/gfx/dead.png',
+  'assets/gfx/faint.png',
+  'assets/gfx/noise_01.png',
+  'assets/gfx/bloody_screen.png',
+  'assets/gfx/flash_screen.png',
+  'assets/gfx/star.png',
+  'assets/gfx/paparazzo_01.png',
+  'assets/gfx/paparazzo_02.png',
+  'assets/gfx/paparazzo_03.png',
+  'assets/gfx/paparazzo_04.png',
+  'assets/gfx/paparazzo_05.png',
+  'assets/gfx/auto_01.png',
+  'assets/gfx/auto_02.png',
+  'assets/gfx/auto_03.png',
+  'assets/gfx/auto_04.png',
+  'assets/gfx/autoB_01.png',
+  'assets/gfx/autoB_02.png',
+  'assets/gfx/autoB_03.png',
+  'assets/gfx/autoB_04.png',
+  'assets/gfx/taxi.png',
+  'assets/gfx/moneyz.png',
+  'assets/gfx/moneyz_win.png',
+  'assets/gfx/moneyz_poof.png',
+  'assets/gfx/explode_01.png',
+  'assets/gfx/explode_02.png',
+  'assets/gfx/explode_03.png',
+  'assets/gfx/explode_04.png',
+  'assets/gfx/hud/need_00.png',
+  'assets/gfx/hud/need_01.png',
+  'assets/gfx/hud/need_02.png',
+  'assets/gfx/hud/need_03.png',
+  'assets/gfx/hud/need_04.png',
+  'assets/gfx/hud/need_05.png',
+  'assets/gfx/hud/head_00.png',
+  'assets/gfx/hud/head_01.png',
+  'assets/gfx/hud/head_02.png',
+  'assets/gfx/hud/head_03.png',
+  'assets/gfx/hud/head_04.png',
+  'assets/gfx/hud/head_05.png',
+  'assets/gfx/hud/head_06.png',
+  'assets/gfx/hud/head_07.png',
+  'assets/gfx/hud/head_08.png',
+  'assets/snd/chase.mp3',
+  'assets/snd/camara_01.mp3',
+  'assets/snd/camara_02.mp3',
+  'assets/snd/camara_03.mp3',
+  'assets/snd/camara_04.mp3',
+  'assets/snd/camara_05.mp3',
+  'assets/snd/car/car_01.mp3',
+  'assets/snd/car/car_02.mp3',
+  'assets/snd/car/car_03.mp3',
+  'assets/snd/car/car_04.mp3',
+  'assets/snd/car/car_05.mp3',
+  'assets/snd/moneyz/moneyz_01.mp3',
+  'assets/snd/moneyz/moneyz_02.mp3',
+  'assets/snd/moneyz/moneyz_03.mp3',
+  'assets/snd/moneyz/moneyz_04.mp3',
+  'assets/snd/moneyz/moneyz_05.mp3',
+  'assets/snd/paparazzed.mp3',
+  'assets/snd/deaded.mp3',
+  'assets/snd/win.mp3',
+  'assets/snd/intro_click.mp3'
+];
+
+test('main v1 art and audio assets referenced by the port exist on disk', () => {
+  ASSET_PATHS.forEach((relativePath) => {
+    const absolutePath = path.join(__dirname, '..', '..', relativePath);
+    assert.equal(fs.existsSync(absolutePath), true, relativePath + ' should exist');
+  });
+});

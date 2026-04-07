@@ -6,6 +6,7 @@ bin/
 # Packages #
 ############
 *.7z
+node_modules/
 
 # Source Media #
 ################

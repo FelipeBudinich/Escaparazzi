@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Intro Smoke Test</title>
+</head>
+<body>
+  <pre id="result">booting</pre>
+  <iframe id="game" style="width:700px;height:560px;border:0"></iframe>
+  <script>
+    (function () {
+      var STORAGE_KEY = 'Escaparazzi';
+      var params = new URLSearchParams(window.location.search);
+      var result = document.getElementById('result');
+      var iframe = document.getElementById('game');
+      var seededAchievements = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+      function waitForReady() {
+        var doc = iframe.contentDocument;
+
+        if (!doc) {
+          window.setTimeout(waitForReady, 50);
+          return;
+        }
+
+        if (doc.documentElement.getAttribute('data-boot-state') !== 'ready') {
+          window.setTimeout(waitForReady, 50);
+          return;
+        }
+
+        runScenario(doc, iframe.contentWindow);
+      }
+
+      function emitResult(doc) {
+        var payload = {
+          bootState: doc.documentElement.getAttribute('data-boot-state'),
+          screen: doc.documentElement.getAttribute('data-screen'),
+          highScore: doc.documentElement.getAttribute('data-high-score'),
+          stored: window.localStorage.getItem(STORAGE_KEY)
+        };
+
+        result.textContent = JSON.stringify(payload, null, 2);
+      }
+
+      function dispatchKey(targetWindow, type, keyCode, keyName) {
+        targetWindow.dispatchEvent(new KeyboardEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          key: keyName,
+          code: 'Key' + String(keyName || '').toUpperCase(),
+          keyCode: keyCode,
+          which: keyCode
+        }));
+      }
+
+      function dispatchPlayClick(doc) {
+        var canvas = doc.getElementById('canvas');
+        var rect = canvas.getBoundingClientRect();
+        var x = rect.left + (80 * 2);
+        var y = rect.top + (190 * 2);
+        var options = {
+          bubbles: true,
+          cancelable: true,
+          clientX: x,
+          clientY: y,
+          button: 0
+        };
+
+        canvas.dispatchEvent(new MouseEvent('mousemove', options));
+        canvas.dispatchEvent(new MouseEvent('mousedown', options));
+        canvas.dispatchEvent(new MouseEvent('mouseup', options));
+      }
+
+      function runScenario(doc, targetWindow) {
+        var action = params.get('action');
+
+        if (action === 'combo-re') {
+          dispatchKey(targetWindow, 'keydown', 82, 'r');
+          dispatchKey(targetWindow, 'keydown', 69, 'e');
+          dispatchKey(targetWindow, 'keyup', 82, 'r');
+          dispatchKey(targetWindow, 'keyup', 69, 'e');
+        } else if (action === 'start-a') {
+          dispatchKey(targetWindow, 'keydown', 65, 'a');
+          dispatchKey(targetWindow, 'keyup', 65, 'a');
+        } else if (action === 'click-play') {
+          dispatchPlayClick(doc);
+        }
+
+        window.setTimeout(function () {
+          emitResult(doc);
+        }, 250);
+      }
+
+      iframe.addEventListener('load', function () {
+        window.setTimeout(waitForReady, 50);
+      });
+
+      if (params.get('clearStorage') === '1') {
+        window.localStorage.removeItem(STORAGE_KEY);
+      }
+
+      if (params.get('seedHighScore') !== null) {
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          highScore: parseInt(params.get('seedHighScore'), 10) || 0,
+          achievements: params.get('seedAchievements') ? params.get('seedAchievements').split(':') : seededAchievements
+        }));
+      }
+
+      iframe.src = '/port/';
+    }());
+  </script>
+</body>
+</html>
