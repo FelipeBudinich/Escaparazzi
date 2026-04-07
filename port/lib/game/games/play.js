@@ -41,6 +41,12 @@ ig.module(
     return null;
   }
 
+  function countActive(collection) {
+    return collection.filter(function (item) {
+      return item.active;
+    }).length;
+  }
+
   function visibleFollowers(state) {
     return state.entities.chaseChain.filter(function (member) {
       return member.role === 'paparazzo' && member.active;
@@ -61,12 +67,25 @@ ig.module(
     return Math.max(0, Math.min(maxAlpha, (timerMs / maxMs) * maxAlpha));
   }
 
+  function formatTimerMs(timerMs, sentinel) {
+    if (sentinel !== undefined && timerMs >= sentinel) {
+      return 'idle';
+    }
+
+    return String(Math.max(0, Math.round(timerMs)));
+  }
+
   ig.global.PlayGame = ig.Game.extend({
     clearColor: '#08121f',
 
     init: function () {
       this.core = window.EscaparazziCore;
       this.context = ig.global.Escaparazzi || {};
+      this.debugConfig = this.core.DEBUG_CONFIG || {
+        enabled: false,
+        renderOverlay: false,
+        logEvents: false
+      };
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
@@ -98,6 +117,10 @@ ig.module(
       }
 
       setDocumentState(this.session, this.state);
+      this.logDebugEvent('screen-enter', {
+        screen: 'play',
+        phase: this.state.phase
+      });
     },
 
     bindControls: function () {
@@ -230,9 +253,19 @@ ig.module(
       });
     },
 
+    logDebugEvent: function (eventName, details) {
+      if (!this.core || typeof this.core.debugLog !== 'function') {
+        return;
+      }
+
+      this.core.debugLog(eventName, details);
+    },
+
     applyPresentationEvents: function (previousState, nextState) {
       var previousFollowerMap = mapById(visibleFollowers(previousState));
       var nextFollowerMap = mapById(visibleFollowers(nextState));
+      var previousVisibleFollowerCount = Object.keys(previousFollowerMap).length;
+      var nextVisibleFollowerCount = Object.keys(nextFollowerMap).length;
       var removedFollowerIds = Object.keys(previousFollowerMap).filter(function (id) {
         return !nextFollowerMap[id];
       });
@@ -245,8 +278,80 @@ ig.module(
       var residualScoreDelta;
       var index;
       var removedFollower;
+      var coinCollected = previousCoin &&
+        !nextCoin &&
+        nextState.timers.cashGrabMs < this.core.GAME_CONFIG.timingMs.cashGrabSentinel &&
+        nextState.score > previousState.score;
+
+      if (previousState.phase !== nextState.phase) {
+        this.logDebugEvent('phase-change', {
+          from: previousState.phase,
+          to: nextState.phase,
+          score: nextState.score,
+          money: nextState.money
+        });
+      }
+
+      if (!previousCoin && nextCoin) {
+        this.logDebugEvent('coin-spawned', {
+          id: nextCoin.id,
+          x: nextCoin.x,
+          y: nextCoin.y,
+          timerMs: nextState.timers.moneyzTimerMs
+        });
+      }
+
+      if (coinCollected) {
+        this.logDebugEvent('coin-collected', {
+          id: previousCoin.id,
+          money: nextState.money,
+          score: nextState.score
+        });
+      } else if (previousCoin && !nextCoin) {
+        this.logDebugEvent('coin-expired', {
+          id: previousCoin.id,
+          timerMs: previousState.timers.moneyzTimerMs
+        });
+      }
+
+      if (nextVisibleFollowerCount > previousVisibleFollowerCount) {
+        this.logDebugEvent('followers-spawned', {
+          added: nextVisibleFollowerCount - previousVisibleFollowerCount,
+          total: nextVisibleFollowerCount
+        });
+      }
+
+      if (removedFollowerIds.length > 0) {
+        this.logDebugEvent(
+          previousState.phase === this.core.GAME_PHASE.WIN_SEQUENCE || enteredWinSequence
+            ? 'followers-cashed-out'
+            : 'followers-hit-by-traffic',
+          {
+            removed: removedFollowerIds.length,
+            remaining: nextVisibleFollowerCount,
+            scoreDelta: scoreDelta
+          }
+        );
+      }
+
+      if (!previousState.flags.playerTouchingTaxi && nextState.flags.playerTouchingTaxi) {
+        this.logDebugEvent('taxi-contact-start', {
+          money: nextState.money,
+          phase: nextState.phase
+        });
+      } else if (previousState.flags.playerTouchingTaxi && !nextState.flags.playerTouchingTaxi) {
+        this.logDebugEvent('taxi-contact-end', {
+          money: nextState.money,
+          phase: nextState.phase
+        });
+      }
 
       if (nextState.photos > previousState.photos) {
+        this.logDebugEvent('photo-hit', {
+          totalPhotos: nextState.photos,
+          totalDamage: nextState.photos + nextState.crashes,
+          cooldownMs: nextState.timers.timerPhotoMs
+        });
         this.photoFlashMs = 180;
         if (this.audio) {
           this.audio.playEffect('camera');
@@ -276,7 +381,7 @@ ig.module(
       }
 
       if (previousCoin && !nextCoin) {
-        if (nextState.timers.cashGrabMs < this.core.GAME_CONFIG.timingMs.cashGrabSentinel && nextState.score > previousState.score) {
+        if (coinCollected) {
           this.createPopup(
             nextState.entities.chaseChain[0].x,
             nextState.entities.chaseChain[0].y - 12,
@@ -301,6 +406,12 @@ ig.module(
       }
 
       if (residualScoreDelta >= 100) {
+        this.logDebugEvent('player-crash', {
+          scoreDelta: residualScoreDelta,
+          totalCrashes: nextState.crashes,
+          totalDamage: nextState.photos + nextState.crashes,
+          cooldownMs: nextState.timers.timerPhotoMs
+        });
         this.crashFlashMs = 180;
         this.shakeMs = 140;
         this.createExplosionEffect(nextState.entities.chaseChain[0].x, nextState.entities.chaseChain[0].y, 'player-crash');
@@ -327,6 +438,43 @@ ig.module(
           this.audio.stopMusic();
         }
       }
+    },
+
+    drawDebugOverlay: function () {
+      var player;
+      var coin;
+
+      if (!this.core ||
+        typeof this.core.isDebugOverlayEnabled !== 'function' ||
+        !this.core.isDebugOverlayEnabled(this.debugConfig) ||
+        typeof this.core.renderDebugOverlay !== 'function') {
+        return;
+      }
+
+      player = this.state.entities.chaseChain[0];
+      coin = activeCoin(this.state);
+
+      this.core.renderDebugOverlay({
+        context: ig.system.context,
+        scale: ig.system.scale,
+        drawPos: ig.system.getDrawPos.bind(ig.system),
+        x: 8,
+        y: 44,
+        lines: [
+          'phase: ' + this.state.phase,
+          'player: ' + player.x + ',' + player.y + ' facing ' + this.state.movement.facing,
+          'score/high: ' + this.state.score + ' / ' + (this.session ? this.session.highScore : 0),
+          'damage: ' + (this.state.photos + this.state.crashes) + ' (photo ' + this.state.photos + ', crash ' + this.state.crashes + ')',
+          'money: ' + this.state.money + ' taxi: ' + (this.state.flags.playerTouchingTaxi ? 'touching' : 'away'),
+          'followers: ' + visibleFollowers(this.state).length + ' coin: ' + (coin ? (coin.x + ',' + coin.y) : 'none'),
+          'timers: photo ' + formatTimerMs(this.state.timers.timerPhotoMs) + ' papi ' + formatTimerMs(this.state.timers.timerPaparazziMs),
+          'coin/cash: ' + formatTimerMs(this.state.timers.moneyzTimerMs) + ' / ' +
+            formatTimerMs(this.state.timers.cashGrabMs, this.core.GAME_CONFIG.timingMs.cashGrabSentinel),
+          'traffic: f ' + countActive(this.state.entities.traffic) +
+            ' r ' + countActive(this.state.entities.oppositeTraffic) +
+            ' t ' + countActive(this.state.entities.taxiLane)
+        ]
+      });
     },
 
     updateEffects: function () {
@@ -473,12 +621,6 @@ ig.module(
       ctx.fillStyle = '#f4f1de';
       ctx.font = (16 * scale) + 'px monospace';
       ctx.fillText(String(this.state.score), ig.system.getDrawPos(20), ig.system.getDrawPos(200));
-
-      ctx.font = (8 * scale) + 'px monospace';
-      ctx.fillStyle = '#97cee3';
-      ctx.fillText('Damage ' + (this.state.photos + this.state.crashes) + '/8', ig.system.getDrawPos(20), ig.system.getDrawPos(30));
-      ctx.fillText('Taxi fare ' + this.state.money + '/5', ig.system.getDrawPos(220), ig.system.getDrawPos(30));
-      ctx.fillText('High ' + (this.session ? this.session.highScore : 0), ig.system.getDrawPos(20), ig.system.getDrawPos(214));
       ctx.restore();
     },
 
@@ -570,15 +712,7 @@ ig.module(
       }
 
       this.drawHud();
-
-      if (this.state.phase === this.core.GAME_PHASE.WIN_SEQUENCE) {
-        ctx.save();
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#fff6a8';
-        ctx.font = (8 * scale) + 'px monospace';
-        ctx.fillText('Taking the cab...', ig.system.getDrawPos(160), ig.system.getDrawPos(224));
-        ctx.restore();
-      }
+      this.drawDebugOverlay();
 
       ctx.save();
       ctx.globalAlpha = 0.2;

@@ -40,7 +40,13 @@ ig.module(
     clearColor: '#000000',
 
     init: function () {
+      this.core = window.EscaparazziCore || {};
       this.context = ig.global.Escaparazzi || {};
+      this.debugConfig = this.core.DEBUG_CONFIG || {
+        enabled: false,
+        renderOverlay: false,
+        logEvents: false
+      };
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
@@ -64,6 +70,14 @@ ig.module(
       window.addEventListener('keyup', this.keyUpHandler, false);
 
       setDocumentState(this.session, this.session && this.session.currentRun ? this.session.currentRun.score : 0);
+
+      if (typeof this.core.debugLog === 'function') {
+        this.core.debugLog('screen-enter', {
+          screen: 'winrar',
+          score: this.session && this.session.currentRun ? this.session.currentRun.score : 0,
+          highScore: this.saveData.highScore
+        });
+      }
     },
 
     detachHandlers: function () {
@@ -90,6 +104,13 @@ ig.module(
       this.saveData = this.session.resetSave();
       this.resetFlashTimerMs = 1200;
       setDocumentState(this.session, this.session.currentRun ? this.session.currentRun.score : 0);
+
+      if (typeof this.core.debugLog === 'function') {
+        this.core.debugLog('save-reset', {
+          screen: 'winrar',
+          highScore: this.saveData.highScore
+        });
+      }
     },
 
     onKeyDown: function (event) {
@@ -157,22 +178,31 @@ ig.module(
       ctx.fillText('Current Score ' + score, ig.system.getDrawPos(160), ig.system.getDrawPos(58));
       ctx.fillStyle = '#fff6a8';
       ctx.fillText('Highest Score ' + this.saveData.highScore, ig.system.getDrawPos(160), ig.system.getDrawPos(148));
-      ctx.font = (8 * ig.system.scale) + 'px monospace';
-      ctx.fillStyle = '#97cee3';
-      ctx.fillText('Press any key or click for Intro', ig.system.getDrawPos(160), ig.system.getDrawPos(210));
-      ctx.fillText('Press R+E to reset highscores', ig.system.getDrawPos(160), ig.system.getDrawPos(222));
-
-      if (this.resetFlashTimerMs > 0) {
-        ctx.fillStyle = '#f4f1de';
-        ctx.fillText('High scores reset', ig.system.getDrawPos(160), ig.system.getDrawPos(198));
-      }
-
       ctx.restore();
 
       ctx.save();
       ctx.globalAlpha = 0.2;
       this.media.images.scanlines.draw(0, 0);
       ctx.restore();
+
+      if (
+        this.core &&
+        typeof this.core.isDebugOverlayEnabled === 'function' &&
+        this.core.isDebugOverlayEnabled(this.debugConfig) &&
+        typeof this.core.renderDebugOverlay === 'function'
+      ) {
+        this.core.renderDebugOverlay({
+          context: ctx,
+          scale: ig.system.scale,
+          drawPos: ig.system.getDrawPos.bind(ig.system),
+          lines: [
+            'screen: winrar',
+            'score: ' + score,
+            'high score: ' + this.saveData.highScore,
+            'reset flash: ' + Math.max(0, Math.round(this.resetFlashTimerMs))
+          ]
+        });
+      }
     }
   });
 });

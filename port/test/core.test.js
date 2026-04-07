@@ -4,6 +4,12 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { GAME_CONFIG } = require('../lib/game/core/game-config');
+const {
+  DEBUG_CONFIG,
+  createDebugConfig,
+  isDebugOverlayEnabled,
+  isDebugLoggingEnabled
+} = require('../lib/game/core/debug-config');
 const { GAME_PHASE } = require('../lib/game/core/game-phase');
 const { EMPTY_INPUT_SNAPSHOT, createInputSnapshot } = require('../lib/game/core/input-snapshot');
 const { createRng, randomIntInclusive } = require('../lib/game/core/rng');
@@ -25,6 +31,23 @@ test('GAME_CONFIG preserves the frozen AS3 startup values', () => {
   assert.equal(GAME_CONFIG.initialCounts.trafficTotal, 2);
   assert.equal(GAME_CONFIG.initialCounts.oppositeTrafficTotal, 1);
   assert.equal(GAME_CONFIG.initialCounts.taxiTotal, 1);
+});
+
+test('debug config defaults stay off while a single enabled flag turns overlay and logs on', () => {
+  const enabledConfig = createDebugConfig({ enabled: true });
+  const overlayOnlyConfig = createDebugConfig({ renderOverlay: true });
+
+  assert.equal(DEBUG_CONFIG.enabled, false);
+  assert.equal(isDebugOverlayEnabled(DEBUG_CONFIG), false);
+  assert.equal(isDebugLoggingEnabled(DEBUG_CONFIG), false);
+
+  assert.equal(enabledConfig.enabled, true);
+  assert.equal(isDebugOverlayEnabled(enabledConfig), true);
+  assert.equal(isDebugLoggingEnabled(enabledConfig), true);
+
+  assert.equal(overlayOnlyConfig.enabled, false);
+  assert.equal(isDebugOverlayEnabled(overlayOnlyConfig), true);
+  assert.equal(isDebugLoggingEnabled(overlayOnlyConfig), false);
 });
 
 test('randomIntInclusive matches util.rand inclusive bounds', () => {
