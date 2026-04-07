@@ -4,7 +4,9 @@ ig.module(
 .requires(
   'impact.game',
   'impact.input',
-  'game.media'
+  'game.media',
+  'game.ui.hud',
+  'game.ui.popup-text'
 )
 .defines(function () {
   var DIRECTION_BINDINGS = [
@@ -89,6 +91,8 @@ ig.module(
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
+      this.hudRenderer = ig.global.EscaparazziHud;
+      this.popupTextRenderer = ig.global.EscaparazziPopupText;
       this.rng = this.core.createRng(Date.now());
       this.state = this.core.newGameState({ nowMs: 0, rng: this.rng });
       this.transitioning = false;
@@ -581,17 +585,14 @@ ig.module(
 
     drawEffects: function () {
       var ctx = ig.system.context;
-      var scale = ig.system.scale;
+      var popupTextRenderer = this.popupTextRenderer;
 
       this.effects.forEach(function (effect) {
         if (effect.type === 'popup') {
-          ctx.save();
-          ctx.globalAlpha = effect.ttlMs / effect.maxTtlMs;
-          ctx.textAlign = 'left';
-          ctx.fillStyle = effect.color;
-          ctx.font = (effect.size * scale) + 'px monospace';
-          ctx.fillText(effect.text, ig.system.getDrawPos(effect.x), ig.system.getDrawPos(effect.y));
-          ctx.restore();
+          popupTextRenderer.draw(effect, {
+            context: ctx,
+            system: ig.system
+          });
           return;
         }
 
@@ -605,23 +606,6 @@ ig.module(
 
         effect.animation.draw(effect.x, effect.y);
       });
-    },
-
-    drawHud: function () {
-      var ctx = ig.system.context;
-      var scale = ig.system.scale;
-      var hudNeedImage = this.media.hudNeedImageForMoney(this.state.money);
-      var hudHeadImage = this.media.hudHeadImageForDamage(this.state.photos + this.state.crashes);
-
-      hudHeadImage.draw(20, 8);
-      hudNeedImage.draw(220, 8);
-
-      ctx.save();
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#f4f1de';
-      ctx.font = (16 * scale) + 'px monospace';
-      ctx.fillText(String(this.state.score), ig.system.getDrawPos(20), ig.system.getDrawPos(200));
-      ctx.restore();
     },
 
     draw: function () {
@@ -711,7 +695,13 @@ ig.module(
         ctx.restore();
       }
 
-      this.drawHud();
+      this.hudRenderer.drawPlayHud({
+        context: ctx,
+        system: ig.system,
+        media: this.media,
+        session: this.session,
+        state: this.state
+      });
       this.drawDebugOverlay();
 
       ctx.save();

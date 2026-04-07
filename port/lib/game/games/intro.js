@@ -4,7 +4,8 @@ ig.module(
 .requires(
   'impact.game',
   'impact.input',
-  'game.media'
+  'game.media',
+  'game.ui.intro-overlay'
 )
 .defines(function () {
   var PLAY_HITBOX = {x: 55, y: 175, width: 85, height: 34};
@@ -63,6 +64,7 @@ ig.module(
       this.media = this.context.media || ig.global.EscaparazziMedia;
       this.audio = this.context.audio || null;
       this.session = this.context.session || null;
+      this.introOverlay = ig.global.EscaparazziIntroOverlay;
       this.saveData = this.session ? this.session.getSaveData() : {
         highScore: 0,
         achievements: []
@@ -208,6 +210,13 @@ ig.module(
         this.media.images.flash.draw(0, 0);
         ctx.restore();
       }
+
+      this.introOverlay.draw({
+        context: ctx,
+        system: ig.system,
+        highScore: this.saveData.highScore,
+        resetFlashTimerMs: this.resetFlashTimerMs
+      });
 
       if (
         this.core &&
